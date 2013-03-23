@@ -1,13 +1,7 @@
 
-/*
- * GET home page.
- */
-
 exports.index = function(req, res){
   res.render('index', { title: 'Express' });
 };
-
-
 
 // connection
 var mongoose 	= require('mongoose')
@@ -31,16 +25,12 @@ exports.getPersonas = function (req, res, next) {
 	})
 }
 
-
-
 exports.save = function (req, res, next) {
 
 	Persona.remove({}, function (err) {
-		// if (!err) {
-		// 	res.end(JSON.stringify( {result: true} ))
-		// } else {
-		// 	res.end(JSON.stringify( {result: false} ))
-		// }
+		if (err) {
+			res.end(JSON.stringify( {result: false} ))
+		}
 	})
 	
 	// var data = req.body[0]
@@ -65,7 +55,10 @@ exports.save = function (req, res, next) {
 	var resultado = [];
 	var successArray = [];
 
-	data.forEach(function(value, index){
+	data.forEach(obtainPerson);
+
+	function obtainPerson(value, index){
+
 		var meetup = new Persona(value)
 		meetup.validate(function (err) {
 			if (err) {
@@ -75,11 +68,9 @@ exports.save = function (req, res, next) {
 				procesarDatos(true, null)
 			}
 		})
-	})
-
+	}
 
 	function procesarDatos(exito, mensaje) {
-
 
 		resultado.push({resultado: exito, mensaje: mensaje});
 
@@ -88,19 +79,14 @@ exports.save = function (req, res, next) {
 
 		if (resultado.length == data.length || timeout) {
 
-			// resultado.forEach(function(value, index) {
 			for (var i = 0; i < resultado.length; i++) {
 
-				// console.log(value.mensaje)
 				// if (value.resultado == false && value.mensaje) {
-				// console.log(resultado[i])
 				console.log("iteracion " + i)
 				if (resultado[i].resultado == false) {
-					// console.log( resultado[i].mensaje )
-					// res.send( JSON.stringify(resultado[i].mensaje) )
-					res.send( JSON.stringify(resultado[i]) )
-
-
+				
+					// res.send( JSON.stringify(resultado[i]) )
+					
 
 					// res.send( JSON.stringify(  value.mensaje ) )
 
@@ -112,11 +98,12 @@ exports.save = function (req, res, next) {
 					// 	res.send( value.mensaje[i].value.type )
 					// }
 
-					// for (var temp in value.mensaje) {
-					// 	// res.send( JSON.stringify( temp.type ) )
-					// 	// res.send( temp.type )
-						// res.send( JSON.stringify(value.mensaje.temp) )
-					// }
+					for (var temp in resultado[i].mensaje) {
+						// res.send( JSON.stringify( temp.type ) )
+						// res.send( temp.type )
+						console.log("temp: " + resultado[i].mensaje)
+						res.send( JSON.stringify(resultado[i].mensaje.temp) )
+					}
 					// res.send(  value.mensaje  )
 				} else {
 
@@ -125,23 +112,12 @@ exports.save = function (req, res, next) {
 				console.log(resultado.length)
 				console.log(i)
 
-				// if (index == resultado.length) {
 				if (i == resultado.length-1) {
-
 					// res.render('index', )
 					res.end();
 				}
 			}
-
-			// console.log( resultado[2].mensaje )
-			// res.send( JSON.stringify(  resultado[2].mensaje ) )
-
-
-			// res.end( JSON.stringify( resultado[1].mensaje ) )
 		} 
 	}
-
-
-
 }
 
