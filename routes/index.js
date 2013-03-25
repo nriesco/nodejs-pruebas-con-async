@@ -46,14 +46,22 @@ exports.save = function (req, res, next) {
 			emails: [
 				{ email: 'email de juanito' },
 				{ email: 'e' }, 
-				{ email: '' }
+				{ email: 'kk' }
 
 			]
 		}
 	]
 
-	var resultado = [];
+	var resultadoArray = [];
 	var successArray = [];
+	var outputArray = [];
+	var timeout = false;
+
+	var saveTimeout = setTimeout(setTimeoutTrue, 1 * 1); // in miliseconds
+	function setTimeoutTrue() {
+		timeout = true;
+	}
+
 
 	data.forEach(obtainPerson);
 
@@ -72,49 +80,47 @@ exports.save = function (req, res, next) {
 
 	function procesarDatos(exito, mensaje) {
 
-		resultado.push({resultado: exito, mensaje: mensaje});
+		resultadoArray.push({resultado: exito, mensaje: mensaje});
 
-		var timeout = false;
+		console.log("timeout: " + saveTimeout + " " + timeout);
 		// verificar si ha pasado x segundos
 
-		if (resultado.length == data.length || timeout) {
+		if (resultadoArray.length == data.length || timeout) {
 
-			for (var i = 0; i < resultado.length; i++) {
+			for (var i = 0; i < resultadoArray.length; i++) {
 
 				// if (value.resultado == false && value.mensaje) {
 				console.log("iteracion " + i)
-				if (resultado[i].resultado == false) {
-				
-					// res.send( JSON.stringify(resultado[i]) )
-					
+				if (resultadoArray[i].resultado == false) {
 
-					// res.send( JSON.stringify(  value.mensaje ) )
+					for (var keyTemp in resultadoArray[i].mensaje) {
 
+						if ((typeof resultadoArray[i].mensaje[keyTemp].errors) != 'undefined') {
+							console.log('multiples erroes')
+							console.log(resultadoArray[i].mensaje[keyTemp].errors)
+							console.log('ahora...')
+							outputArray.push("Múltiples errores")
+						} else {
+							console.log("keyTemp: " + keyTemp);
+							console.log(resultadoArray[i].mensaje[keyTemp])
+							outputArray.push( resultadoArray[i].mensaje[keyTemp].type )
+						}
+						
+					}
+					console.log('fin iteracion')
 
-					// console.log(value.mensaje)
-
-					// for (var i = 0; i < value.mensaje.length; i++) {
-					// 	// console.log("")
-					// 	res.send( value.mensaje[i].value.type )
+					// for (var j = 0; j < resultado[i].mensaje.properties.length; j++) {
+					// 	alert(' name=' + resultado[i].mensaje.properties[j].name 
+					// 	+ ' value=' + resultado[i].mensaje.properties[j].value);
 					// }
 
-					for (var temp in resultado[i].mensaje) {
-						// res.send( JSON.stringify( temp.type ) )
-						// res.send( temp.type )
-						console.log("temp: " + resultado[i].mensaje)
-						res.send( JSON.stringify(resultado[i].mensaje.temp) )
-					}
-					// res.send(  value.mensaje  )
 				} else {
 
 				}
 
-				console.log(resultado.length)
-				console.log(i)
-
-				if (i == resultado.length-1) {
+				if (i == resultadoArray.length-1) {
 					// res.render('index', )
-					res.end();
+					res.end( JSON.stringify({resultado: false, mensajes: outputArray}) );
 				}
 			}
 		} 
