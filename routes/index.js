@@ -47,35 +47,73 @@ exports.save = function (req, res, next) {
 			nombre: 'Juanito',
 			emails: [
 				{ email: 'email de juanito' },
-				{ email: 'e' }, 
-				{ email: 'kk' }
+				{ email: 'ekk' }, 
+				{ email: 'kkk' }
 
 			]
 		}
 	]
 
 
+
+	var meetup = new Persona(inputData[1])
+	meetup.validate(function(err) {
+		if (err) {
+			console.log("ERRROR")
+
+		} else {
+			console.log("OK DOKEY")
+		}
+	})
+
+
 	var parallelProcessArray = [];
 
 
-	function validate() {
+	function grabarObjeto(meetup, callback) {
 
+	}
+
+	var arregloErrores = []
+
+	// Acá abajo declaro el mock de la función que graba
+	// Vamos a tirar intencionalmente un error en el segundo mockData
+	// Comenta la llamada al callback si quieres que todo "salga bien"
+	function grabarObjeto(inputData, callback) {
+		console.log("a punto de validar")
+		console.log(inputData)
+		inputData.validate(function (err) {
+			if (err) {
+				if (err.errors) {
+					if (err.errors.errors) {
+						// caso con problemas
+						console.log('caso con problemas')
+					} else {
+						// este caso está manejado correctamente
+						arregloErrores.push(err.errors)
+					}
+				} else {
+					//
+					console.log('caso extranio 1')
+				}
+				return callback(new Error('error uno'))
+			} else {
+				console.log('caso ok')
+				return callback(false, 'grabado ok')
+			}
+		})
 	}
 
 	console.log("inputData.length: " + inputData.length)
 	for (var i = 0; i < inputData.length; i++) {
 		console.log(i)
+		var meetup = new Persona(inputData[i])
+		console.log("inputData[" + i + "]: ")
+		console.log(inputData[i])
+
 		parallelProcessArray.push(
 			function(callback) {
-				var meetup = new Persona(inputData[i])
-				console.log(inputData[i])
-				meetup.validate(function (err) {
-					if (err) {
-						callback("el error", 'nonono')
-					} else {
-						callback(false, 'sisisis')
-					}
-				})
+				grabarObjeto(new Persona(inputData[i]), callback)
 			}
 		)
 	}
@@ -84,10 +122,14 @@ exports.save = function (req, res, next) {
 	async.series(
 		parallelProcessArray,
 		// optional callback
-		function(err, results) {
-			// the results array will equal ['one','two'] even though
-			// the second function had a shorter timeout.
-			console.log(results)
+		function callback(err, results) {
+			if (err) {
+				console.log('Hubo un error');
+				console.log(arregloErrores)
+			} else {
+				console.log('Todo bien ahora hay que grabar!')
+				console.log(results)
+			}
 		}
 	);
 
