@@ -1,4 +1,4 @@
-
+var async = require('async');
 exports.index = function(req, res){
   res.render('index', { title: 'Express' });
 };
@@ -15,7 +15,6 @@ var personaSchema = require('../models/persona')
 * 
 */
 exports.getPersonas = function (req, res, next) {
-
 	Persona.find( { $query: {}, $orderby: { _id : 1 } }, function (err, docs) {
 		var campaignArray = []
 		docs.forEach(function (meetup) {
@@ -24,6 +23,7 @@ exports.getPersonas = function (req, res, next) {
 		res.end(JSON.stringify(campaignArray))
 	})
 }
+
 
 exports.save = function (req, res, next) {
 
@@ -34,13 +34,15 @@ exports.save = function (req, res, next) {
 	})
 	
 	// var data = req.body[0]
-	var data = [
+	var inputData = [
 		{
 			nombre: Math.random()
-		},
+		}
+		,
 		{
 			nombre: 'n'
-		},
+		}
+		,
 		{
 			nombre: 'Juanito',
 			emails: [
@@ -52,7 +54,90 @@ exports.save = function (req, res, next) {
 		}
 	]
 
-	var resultadoArray = [];
+
+	var parallelProcessArray = [];
+
+
+	function validate() {
+
+	}
+
+	console.log("inputData.length: " + inputData.length)
+	for (var i = 0; i < inputData.length; i++) {
+		console.log(i)
+		parallelProcessArray.push(
+			function(callback) {
+				var meetup = new Persona(inputData[i])
+				console.log(inputData[i])
+				meetup.validate(function (err) {
+					if (err) {
+						callback("el error", 'nonono')
+					} else {
+						callback(false, 'sisisis')
+					}
+				})
+			}
+		)
+	}
+
+	// async.parallel(
+	async.series(
+		parallelProcessArray,
+		// optional callback
+		function(err, results) {
+			// the results array will equal ['one','two'] even though
+			// the second function had a shorter timeout.
+			console.log(results)
+		}
+	);
+
+	res.end("fin")
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.saveDEP = function (req, res, next) {
+
+	Persona.remove({}, function (err) {
+		if (err) {
+			res.end(JSON.stringify( {result: false} ))
+		}
+	})
+	
+	// var data = req.body[0]
+	var data = [
+		{
+			nombre: Math.random()
+		}
+		// ,
+		// {
+		// 	nombre: 'n'
+		// }
+		// ,
+		// {
+		// 	nombre: 'Juanito',
+		// 	emails: [
+		// 		{ email: 'email de juanito' },
+		// 		{ email: 'e' }, 
+		// 		{ email: 'kk' }
+
+		// 	]
+		// }
+	]
+
+	var resultadoArray1 = [];
+	var resultadoArray2 = [];
 	var successArray = [];
 	var outputArray = [];
 	var timeout = false;
@@ -80,30 +165,38 @@ exports.save = function (req, res, next) {
 
 	function procesarDatos(exito, mensaje) {
 
-		resultadoArray.push({resultado: exito, mensaje: mensaje});
+		resultadoArray1.push({resultado: exito, mensaje: mensaje});
+		var sinErroresDeValidacion = true;
 
 		console.log("timeout: " + saveTimeout + " " + timeout);
 		// verificar si ha pasado x segundos
 
-		if (resultadoArray.length == data.length || timeout) {
+		if (resultadoArray1.length == data.length || timeout) {
 
-			for (var i = 0; i < resultadoArray.length; i++) {
+			for (var i = 0; i < resultadoArray1.length; i++) {
 
 				// if (value.resultado == false && value.mensaje) {
 				console.log("iteracion " + i)
-				if (resultadoArray[i].resultado == false) {
+				if (resultadoArray1[i].resultado == false) {
 
-					for (var keyTemp in resultadoArray[i].mensaje) {
+					sinErroresDeValidacion = false;
 
-						if ((typeof resultadoArray[i].mensaje[keyTemp].errors) != 'undefined') {
+					var mensajeCorregido = ''
+
+					for (var keyTemp in resultadoArray1[i].mensaje) {
+
+						if ((typeof resultadoArray1[i].mensaje[keyTemp].errors) != 'undefined') {
 							console.log('multiples erroes')
-							console.log(resultadoArray[i].mensaje[keyTemp].errors)
+							console.log(resultadoArray1[i].mensaje[keyTemp].errors)
 							console.log('ahora...')
 							outputArray.push("Múltiples errores")
+							mensajeCorregido = "múltiples errores"
+
 						} else {
 							console.log("keyTemp: " + keyTemp);
-							console.log(resultadoArray[i].mensaje[keyTemp])
-							outputArray.push( resultadoArray[i].mensaje[keyTemp].type )
+							console.log(resultadoArray1[i].mensaje[keyTemp])
+							outputArray.push( resultadoArray1[i].mensaje[keyTemp].type )
+							mensajeCorregido = resultadoArray1[i].mensaje[keyTemp].type
 						}
 						
 					}
@@ -114,16 +207,67 @@ exports.save = function (req, res, next) {
 					// 	+ ' value=' + resultado[i].mensaje.properties[j].value);
 					// }
 
-				} else {
+					resultadoArray2.push({esValido: false, mensaje: mensajeCorregido});
 
+				} else {
+					resultadoArray2.push({esValido: true, mensaje: "sin errores"});
 				}
 
-				if (i == resultadoArray.length-1) {
+				if (i == resultadoArray1.length-1) {
 					// res.render('index', )
-					res.end( JSON.stringify({resultado: false, mensajes: outputArray}) );
+					// res.end( JSON.stringify({aaa: resultadoArray1, resultado: false, mensajes: outputArray}) );
+					if (sinErroresDeValidacion) {
+
+						saveValidData()
+
+					} else {
+						res.end( JSON.stringify({resultado: false, datos: resultadoArray2}) );
+					}
+					
 				}
 			}
 		} 
 	}
+
+
+
+	var algo = []
+
+
+	function saveValidData() {
+		
+		// data.forEach(obtainPerson);
+		// var bloque = data.forEach(obtainPerson);
+		data.forEach(algo.push(obtainPerson))
+
+
+
+		async.parallel(algo,
+		// optional callback
+		function(err, results){
+			// the results array will equal ['one','two'] even though
+			// the second function had a shorter timeout.
+			console.log(results)
+		});
+
+		// @todo: cambiar a algo asi:
+		// var itemsAEjecutar = [];
+		// data.forEach(function(value, index) {
+		// 	itemsAEjecutar.push()
+		// })
+
+		function obtainPerson(value, index){
+
+			var meetup = new Persona(value)
+			meetup.save(function (err) {
+				
+				// esto esta mal, pues habran procesos en background cuando esto aparezca
+				// aca hay que ocupar un parallel o sync para esperar que todos los save 
+				// hayan terminado (y con exito)
+				res.end( JSON.stringify({resultado: true}) );
+			})
+		}		
+	}
+	
 }
 
