@@ -40,7 +40,7 @@ exports.save = function (req, res, next) {
 		}
 		,
 		{
-			nombre: 'n'
+			nombre: 'nn'
 		}
 		,
 		{
@@ -48,7 +48,7 @@ exports.save = function (req, res, next) {
 			emails: [
 				{ email: 'email de juanito' },
 				{ email: 'ekk' }, 
-				{ email: 'kkk' }
+				{ email: 'k' }
 
 			]
 		}
@@ -75,6 +75,7 @@ exports.save = function (req, res, next) {
 	}
 
 	var arregloErrores = []
+	var contadorGlobal = 0;
 
 	// Acá abajo declaro el mock de la función que graba
 	// Vamos a tirar intencionalmente un error en el segundo mockData
@@ -106,14 +107,14 @@ exports.save = function (req, res, next) {
 
 	console.log("inputData.length: " + inputData.length)
 	for (var i = 0; i < inputData.length; i++) {
-		console.log(i)
-		var meetup = new Persona(inputData[i])
-		console.log("inputData[" + i + "]: ")
-		console.log(inputData[i])
+		// console.log(i)
+		// var meetup = new Persona(inputData[i])
+		// console.log("inputData[" + i + "]: ")
+		// console.log(inputData[i])
 
 		parallelProcessArray.push(
 			function(callback) {
-				grabarObjeto(new Persona(inputData[i]), callback)
+				grabarObjeto(new Persona(inputData[contadorGlobal++]), callback)
 			}
 		)
 	}
