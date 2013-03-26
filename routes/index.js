@@ -35,20 +35,20 @@ exports.save = function (req, res, next) {
 	
 	// var data = req.body[0]
 	var inputData = [
-		{
-			nombre: Math.random()
-		}
-		,
-		{
-			nombre: 'nn'
-		}
-		,
+		// {
+		// 	nombre: Math.random()
+		// }
+		// ,
+		// {
+		// 	nombre: 'n'
+		// }
+		// ,
 		{
 			nombre: 'Juanito',
 			emails: [
 				{ email: 'email de juanito' },
-				{ email: 'ekk' }, 
-				{ email: 'k' }
+				{ email: 'e' }, 
+				{ email: 'kjkl' }
 
 			]
 		}
@@ -56,50 +56,99 @@ exports.save = function (req, res, next) {
 
 
 
-	var meetup = new Persona(inputData[1])
-	meetup.validate(function(err) {
-		if (err) {
-			console.log("ERRROR")
+	// var meetup = new Persona(inputData[1])
+	// meetup.validate(function(err) {
+	// 	if (err) {
+	// 		console.log("ERRROR")
 
-		} else {
-			console.log("OK DOKEY")
-		}
-	})
+	// 	} else {
+	// 		console.log("OK DOKEY")
+	// 	}
+	// })
 
 
 	var parallelProcessArray = [];
 
 
-	function grabarObjeto(meetup, callback) {
+	// function grabarObjeto(meetup, callback) {
 
-	}
+	// }
 
 	var arregloErrores = []
 	var contadorGlobal = 0;
 
-	// Acá abajo declaro el mock de la función que graba
-	// Vamos a tirar intencionalmente un error en el segundo mockData
-	// Comenta la llamada al callback si quieres que todo "salga bien"
+
+
+	// if (resultadoArray[i].resultado == false) {
+
+	//   for (var keyTemp in resultadoArray[i].mensaje) {
+
+	//     if ((typeof resultadoArray[i].mensaje[keyTemp].errors) != 'undefined') {
+	//       console.log('multiples erroes')
+	//       console.log(resultadoArray[i].mensaje[keyTemp].errors)
+	//       console.log('ahora...')
+	//       outputArray.push("Múltiples errores")
+	//     } else {
+	//       console.log("keyTemp: " + keyTemp);
+	//       console.log(resultadoArray[i].mensaje[keyTemp])
+	//       outputArray.push( resultadoArray[i].mensaje[keyTemp].type )
+	//     }
+	    
+	//   }
+
+
+	// 
 	function grabarObjeto(inputData, callback) {
 		console.log("a punto de validar")
 		console.log(inputData)
 		inputData.validate(function (err) {
 			if (err) {
-				if (err.errors) {
-					if (err.errors.errors) {
-						// caso con problemas
-						console.log('caso con problemas')
-					} else {
-						// este caso está manejado correctamente
-						arregloErrores.push(err.errors)
+				for (var propiedad in err.errors) {
+					// console.log(propiedad)
+					// console.log(err.errors[propiedad].errors)
+					// if (typeof(propiedad) !== undefined) {
+					// if (typeof(propiedad) !== undefined  &&  propiedad != undefined) {
+					if (typeof(err.errors.propiedad) !== undefined  &&  typeof(propiedad) !== undefined && propiedad != 'undefined') {
+						console.log("propiedad es: ")
+						console.log(propiedad)
+						console.log(err.errors.propiedad)
+						console.log(err.errors[propiedad])
+						// err.errors[propiedad].errors
+						if (typeof(err.errors[propiedad].type) != undefined ) {
+							console.log("propiedad: ")
+							console.log(typeof(err.errors[propiedad].type))
+							console.log("propiedad.type")
+							console.log(propiedad.message)
+							console.log("a punto de hacer push de: err.errors[propiedad].type")
+							console.log(err.errors[propiedad].type)
+							console.log(err.errors)
+							arregloErrores.push(err.errors[propiedad].type)
+
+						}
+						
 					}
-				} else {
-					//
-					console.log('caso extranio 1')
 				}
-				return callback(new Error('error uno'))
+
+				// console.log("inicio err")
+				// // console.log(err.errors)
+				// console.log(typeof(err.errors))
+				// for (var propiedad in err.errors) {
+				// 	console.log(propiedad)
+				// 	console.log(err.errors[propiedad].errors)
+				// }
+				// // console.log(err.errors.properties)
+				// console.log("fin err")
+				// if (err.errors) {
+				// 	// caso con problemas
+				// 	console.log('ERR: caso con problemas')
+				// } else {
+				// 	//
+				// 	console.log('ERR: caso manejado')
+				// 	arregloErrores.push(err.errors)
+				// }
+				return callback(new Error('ERR: error uno'))
 			} else {
-				console.log('caso ok')
+				console.log('OK: caso ok')
 				return callback(false, 'grabado ok')
 			}
 		})
